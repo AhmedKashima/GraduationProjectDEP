@@ -21,7 +21,7 @@ const AdminGate = ({
     }
 
     axios
-      .get("http://127.0.0.1:3000/profile", {
+      .get("https://graduation-backend-v7om.onrender.com/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -26,7 +26,7 @@ const Employee = ({
   const changePermission = (id: number) => {
     axios({
       method: "POST",
-      url: "http://localhost:3000/employees/permission",
+      url: "https://graduation-backend-v7om.onrender.com/employees/permission",
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -55,7 +55,7 @@ const Employee = ({
     ) {
       axios({
         method: "POST",
-        url: "http://localhost:3000/employees/delete",
+        url: "https://graduation-backend-v7om.onrender.com/employees/delete",
         headers: {
           Authorization: "Bearer " + token,
         },
@@ -79,7 +79,7 @@ const Employee = ({
   const createCode = (id: number) => {
     axios({
       method: "POST",
-      url: "http://localhost:3000/recovery/create",
+      url: "https://graduation-backend-v7om.onrender.com/recovery/create",
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -109,7 +109,7 @@ const Employee = ({
   const showCode = (id: number) => {
     axios({
       method: "POST",
-      url: "http://localhost:3000/recovery/display",
+      url: "https://graduation-backend-v7om.onrender.com/recovery/display",
       headers: {
         Authorization: "Bearer " + token,
       },

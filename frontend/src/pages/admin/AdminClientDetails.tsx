@@ -20,14 +20,14 @@ const AdminClientDetails = ({ token }: { token: string }) => {
       try {
         const [clientRes, servicesRes] = await Promise.all([
           axios.post(
-            "http://127.0.0.1:3000/customer/details",
+            "https://graduation-backend-v7om.onrender.com/customer/details",
             { clientID: Number(clientId) },
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           ),
           axios.post(
-            "http://127.0.0.1:3000/service/details",
+            "https://graduation-backend-v7om.onrender.com/service/details",
             { CustomerID: Number(clientId) },
             {
               headers: { Authorization: `Bearer ${token}` },

@@ -33,7 +33,7 @@ function App() {
   // Получение профиля пользователя при наличии токена
   useEffect(() => {
     if (token) {
-      axios.get("http://127.0.0.1:3000/profile", {
+      axios.get("https://graduation-backend-v7om.onrender.com/profile", {
         headers: {
           Authorization: `Bearer ${token}`
         }

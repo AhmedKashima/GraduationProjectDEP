@@ -27,7 +27,7 @@ const AdminDashboard = ({ token }: { token: string }) => {
     if (activeProjects.length > 0) return;
     setActiveLoading(true);
     try {
-      const res = await axios.get("http://127.0.0.1:3000/api/admin/active-projects", {
+      const res = await axios.get("https://graduation-backend-v7om.onrender.com/api/admin/active-projects", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setActiveProjects(res.data || []);
@@ -77,13 +77,13 @@ const AdminDashboard = ({ token }: { token: string }) => {
     const fetchData = async () => {
       try {
         const [metricsRes, activityRes, revenueRes] = await Promise.all([
-          axios.get("http://127.0.0.1:3000/api/admin/metrics", {
+          axios.get("https://graduation-backend-v7om.onrender.com/api/admin/metrics", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://127.0.0.1:3000/api/admin/activity?days=14", {
+          axios.get("https://graduation-backend-v7om.onrender.com/api/admin/activity?days=14", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://127.0.0.1:3000/api/dashboard/revenue_over_time", {
+          axios.get("https://graduation-backend-v7om.onrender.com/api/dashboard/revenue_over_time", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

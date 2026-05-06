@@ -34,7 +34,7 @@ const Clients = (props: any) => {
   function getCustomers() {
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/customer/display",
+      url: "https://graduation-backend-v7om.onrender.com/customer/display",
       headers: {
         Authorization: "Bearer " + props.token,
       },
@@ -56,7 +56,7 @@ const Clients = (props: any) => {
     e.preventDefault();
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/customer/create",
+      url: "https://graduation-backend-v7om.onrender.com/customer/create",
       headers: {
         Authorization: "Bearer " + props.token,
       },

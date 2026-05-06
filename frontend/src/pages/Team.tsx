@@ -21,7 +21,7 @@ const Team = (props: any) => {
   function getProfile() {
     axios({
       method: "GET",
-      url: "http://127.0.0.1:3000/profile",
+      url: "https://graduation-backend-v7om.onrender.com/profile",
       headers: {
         Authorization: "Bearer " + props.token,
       },
@@ -46,7 +46,7 @@ const Team = (props: any) => {
   function getTeam() {
     axios({
       method: "GET",
-      url: "http://127.0.0.1:3000/employees",
+      url: "https://graduation-backend-v7om.onrender.com/employees",
       headers: {
         Authorization: "Bearer " + props.token,
       },
@@ -67,7 +67,7 @@ const Team = (props: any) => {
     e.preventDefault();
     axios({
       method: "POST",
-      url: "http://localhost:3000/employees/create",
+      url: "https://graduation-backend-v7om.onrender.com/employees/create",
       headers: {
         Authorization: "Bearer " + props.token,
       },

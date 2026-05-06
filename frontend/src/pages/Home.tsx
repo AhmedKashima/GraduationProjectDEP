@@ -12,7 +12,7 @@ const Home = (props: any) => {
   function getData() {
     axios({
       method: "GET",
-      url: "http://127.0.0.1:3000/profile",
+      url: "https://graduation-backend-v7om.onrender.com/profile",
       headers: {
         Authorization: "Bearer " + props.token,
       },
@@ -36,7 +36,7 @@ const Home = (props: any) => {
   function logOut() {
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/logout",
+      url: "https://graduation-backend-v7om.onrender.com/logout",
     })
       .then((response) => {
         console.log(response.data);

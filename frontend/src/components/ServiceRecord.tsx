@@ -52,7 +52,7 @@ const ServiceRecord = ({
     ) {
       axios({
         method: "POST",
-        url: "http://localhost:3000/schedule/delete",
+        url: "https://graduation-backend-v7om.onrender.com/schedule/delete",
         headers: {
           Authorization: "Bearer " + token,
         },
@@ -78,7 +78,7 @@ const ServiceRecord = ({
       e.preventDefault();
       axios({
         method: "POST",
-        url: "http://localhost:3000/schedule/edit",
+        url: "https://graduation-backend-v7om.onrender.com/schedule/edit",
         headers: {
           Authorization: "Bearer " + token,
         },
@@ -110,7 +110,7 @@ const ServiceRecord = ({
     {
       axios({
         method: "POST",
-        url: "http://localhost:3000/schedule/complete",
+        url: "https://graduation-backend-v7om.onrender.com/schedule/complete",
         headers: {
           Authorization: "Bearer " + token,
         },
@@ -147,7 +147,7 @@ const ServiceRecord = ({
     e.preventDefault();
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/schedule/techs",
+      url: "https://graduation-backend-v7om.onrender.com/schedule/techs",
       headers: {
         Authorization: "Bearer " + token,
       },

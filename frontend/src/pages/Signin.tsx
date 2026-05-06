@@ -25,7 +25,7 @@ function Signin(props: any) {
     e.preventDefault();
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/token",
+      url: "https://graduation-backend-v7om.onrender.com/token",
       data: {
         email: email,
         password: password,
@@ -60,7 +60,7 @@ function Signin(props: any) {
     e.preventDefault();
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/recovery/check",
+      url: "https://graduation-backend-v7om.onrender.com/recovery/check",
       data: {
         email: email,
         code: code,

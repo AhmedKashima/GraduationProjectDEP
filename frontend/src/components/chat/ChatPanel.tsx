@@ -34,7 +34,7 @@ const ChatPanel = ({
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
-  const socket = useSocket("http://127.0.0.1:3000", userId);
+  const socket = useSocket("https://graduation-backend-v7om.onrender.com", userId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentRecipientId, setCurrentRecipientId] = useState<string | null>(recipientId);
   const [conversationId, setConversationId] = useState<number | null>(null);
@@ -55,7 +55,7 @@ const ChatPanel = ({
   const loadConversations = () => {
     if (!userId) return;
     axios
-      .get(`http://127.0.0.1:3000/api/conversations/${userId}`, {
+      .get(`https://graduation-backend-v7om.onrender.com/api/conversations/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -79,7 +79,7 @@ const ChatPanel = ({
     if (!userId) return;
     axios
       .post(
-        "http://127.0.0.1:3000/api/conversations/read",
+        "https://graduation-backend-v7om.onrender.com/api/conversations/read",
         { conversation_id: convId, user_id: Number(userId) },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -122,7 +122,7 @@ const ChatPanel = ({
     if (!userId) return;
     if (isAdmin) {
       axios
-        .get("http://127.0.0.1:3000/employees", {
+        .get("https://graduation-backend-v7om.onrender.com/employees", {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -142,7 +142,7 @@ const ChatPanel = ({
         .catch((error) => console.error("Ошибка при загрузке команды:", error));
     } else if (!recipientId) {
       axios
-        .get("http://127.0.0.1:3000/api/admins", {
+        .get("https://graduation-backend-v7om.onrender.com/api/admins", {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -171,7 +171,7 @@ const ChatPanel = ({
       setIsTyping(false);
       axios
         .post(
-          "http://127.0.0.1:3000/api/conversations",
+          "https://graduation-backend-v7om.onrender.com/api/conversations",
           { user_id: Number(userId), recipient_id: Number(currentRecipientId) },
           { headers: { Authorization: `Bearer ${token}` } }
         )

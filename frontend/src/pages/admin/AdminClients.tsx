@@ -17,7 +17,7 @@ const AdminClients = ({ token }: { token: string }) => {
     setLoading(true);
     axios
       .post(
-        "http://127.0.0.1:3000/customer/display",
+        "https://graduation-backend-v7om.onrender.com/customer/display",
         { Search: term },
         {
           headers: {
@@ -38,7 +38,7 @@ const AdminClients = ({ token }: { token: string }) => {
   const loadServices = () => {
     axios
       .post(
-        "http://127.0.0.1:3000/service/details",
+        "https://graduation-backend-v7om.onrender.com/service/details",
         {},
         {
           headers: {

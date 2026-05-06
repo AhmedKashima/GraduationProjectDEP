@@ -39,7 +39,7 @@ const History = (props: any) => {
   const getGenerators = () => {
     axios({
       method: "GET",
-      url: "http://127.0.0.1:3000/generators/details",
+      url: "https://graduation-backend-v7om.onrender.com/generators/details",
       headers: {
         Authorization: "Bearer " + props.token,
       },
@@ -56,7 +56,7 @@ const History = (props: any) => {
   const getData = (id: number) => {
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/customer/details",
+      url: "https://graduation-backend-v7om.onrender.com/customer/details",
       headers: {
         Authorization: "Bearer " + props.token,
       },
@@ -82,7 +82,7 @@ const deleteCustomer = (id: number) => {
     ) {
       axios({
         method: "POST",
-        url: "http://127.0.0.1:3000/customer/delete",
+        url: "https://graduation-backend-v7om.onrender.com/customer/delete",
         headers: {
           Authorization: "Bearer " + props.token,
         },
@@ -104,7 +104,7 @@ const deleteCustomer = (id: number) => {
     e.preventDefault();
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/service/create",
+      url: "https://graduation-backend-v7om.onrender.com/service/create",
       headers: {
         Authorization: "Bearer " + props.token,
       },
@@ -137,7 +137,7 @@ const deleteCustomer = (id: number) => {
   const getWork = (id: number) => {
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/service/details",
+      url: "https://graduation-backend-v7om.onrender.com/service/details",
       headers: {
         Authorization: "Bearer " + props.token,
       },

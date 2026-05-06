@@ -26,7 +26,7 @@ const Schedule = (props: any) => {
     // console.log(value);
     axios({
       method: "POST",
-      url: "http://127.0.0.1:3000/schedule/display",
+      url: "https://graduation-backend-v7om.onrender.com/schedule/display",
       headers: {
         Authorization: "Bearer " + props.token,
       },
