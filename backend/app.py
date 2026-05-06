@@ -1,11 +1,8 @@
 import os
 
-from base import app
+from base import api, socketio
 
-try:
-    from extensions import socketio
-except ImportError:
-    socketio = None
+app = api
 
 
 @app.get("/")
@@ -19,17 +16,10 @@ def health_check():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
 
-    if socketio is not None:
-        socketio.run(
-            app,
-            host="0.0.0.0",
-            port=port,
-            debug=False,
-            allow_unsafe_werkzeug=True
-        )
-    else:
-        app.run(
-            host="0.0.0.0",
-            port=port,
-            debug=False
-        )
+    socketio.run(
+        app,
+        host="0.0.0.0",
+        port=port,
+        debug=False,
+        allow_unsafe_werkzeug=True
+    )
