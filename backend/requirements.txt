@@ -12,3 +12,4 @@ flask-sqlalchemy
 flask-migrate
 flask-bcrypt
 Flask-SocketIO
+gunicorn
