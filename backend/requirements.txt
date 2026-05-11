@@ -9,9 +9,7 @@ PyJWT
 python-dotenv
 Werkzeug
 flask-sqlalchemy
-SQLAlchemy
 flask-migrate
 flask-bcrypt
 Flask-SocketIO
 gunicorn
-psycopg2-binary

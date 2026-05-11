@@ -16,7 +16,7 @@ class Employees(db.Model):
     LastName = db.Column(db.String(50), nullable=False)
     PhoneNumber = db.Column(db.Integer, nullable = False)
     Admin = db.Column(db.Boolean, nullable=False)
-    DateHired = db.Column(db.Date, nullable=False)
+    DateHired = db.Column(db.String(345), nullable=False)
 
 class Customers(db.Model):
     __tablename__ = "CUSTOMER"
@@ -41,14 +41,14 @@ class ServiceRecords(db.Model):
     __tablename__ = "SERVICE_RECORD"
     Serviceid = db.Column(db.Integer, primary_key=True, unique=True)
     Customerid = db.Column(db.Integer, db.ForeignKey('CUSTOMER.Customerid'), nullable=False)
-    customer = db.relationship("Customers", backref=db.backref("service_records", uselist=True))
+    ServiceCustomer = db.relationship("Customers", backref=db.backref("CUSTOMER", uselist=False))
     Generatorid = db.Column(db.Integer, db.ForeignKey('GENERATOR.Generatorid'), nullable=False)
-    generator = db.relationship("Generators", backref = db.backref("service_records", uselist=True))
+    ServiceGenerator = db.relationship("Generators", backref = db.backref("GENERATOR", uselist=False))
     ServicePerformed = db.Column(db.Boolean, nullable=False)
-    StartDate = db.Column(db.Date, nullable=False)
-    StartTime = db.Column(db.Time, nullable=False)
-    FinishDate = db.Column(db.Date, nullable=True)
-    FinishTime = db.Column(db.Time, nullable=True)
+    StartDate = db.Column(db.String(10), nullable=False)
+    StartTime = db.Column(db.String(7), nullable=False)
+    FinishDate = db.Column(db.String(10), nullable=True)
+    FinishTime = db.Column(db.String(7), nullable=True)
     ServiceType = db.Column(db.String(50), nullable=False)
     Notes = db.Column(db.Text, nullable=True)
     
@@ -56,9 +56,9 @@ class ServiceRecords(db.Model):
 class Service_Employee_Int(db.Model):
     __tablename__ = "SERVICE_EMPLOYEE_INT"
     Serviceid = db.Column(db.Integer, db.ForeignKey('SERVICE_RECORD.Serviceid'), primary_key = True, nullable=False)
-    service = db.relationship("ServiceRecords", backref=db.backref("technicians", uselist=True))
+    IntService = db.relationship("ServiceRecords", backref=db.backref("SERVICE_RECORD", uselist=False))
     Employeeid = db.Column(db.Integer, db.ForeignKey('EMPLOYEE.Employeeid'), primary_key = True, nullable=True)
-    employee = db.relationship("Employees", backref=db.backref("service_assignments", uselist=True))
+    IntEmployee = db.relationship("Employees", backref=db.backref("EMPLOYEES", uselist=False))
 
 class Password_Recovery(db.Model):
 
@@ -70,7 +70,7 @@ class Password_Recovery(db.Model):
 
     Password = db.Column(db.Text, nullable = False)
 
-    DateMade = db.Column(db.DateTime, nullable = False)
+    DateMade = db.Column(db.String(345), nullable = False)
 
 
 

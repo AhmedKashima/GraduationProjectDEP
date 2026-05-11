@@ -33,6 +33,65 @@ from models import db, Employees
 app = api
 
 
+def seed_demo_admin():
+    admin_email = "admin@demo.com"
+    admin_password = "Admin12345"
+
+    with app.app_context():
+        db.create_all()
+
+        admin = Employees.query.filter_by(Email=admin_email).first()
+
+        if admin is None:
+            admin = Employees(
+                Employeeid=1,
+                Email=admin_email,
+                Password=bcrypt.generate_password_hash(admin_password).decode("utf-8"),
+                FirstName="Ahmed",
+                LastName="Admin",
+                PhoneNumber="+70000000000",
+                Admin=True,
+                DateHired="2026-05-06"
+            )
+            db.session.add(admin)
+            db.session.commit()
+        else:
+            admin.Admin = True
+            db.session.commit()
+
+
+def seed_demo_user():
+    user_email = "worker@demo.com"
+    user_password = "Worker12345"
+
+    with app.app_context():
+        # db.create_all() is already called in seed_demo_admin, but safe to keep
+        user = Employees.query.filter_by(Email=user_email).first()
+
+        if user is None:
+            user = Employees(
+                Email=user_email,
+                Password=bcrypt.generate_password_hash(user_password).decode("utf-8"),
+                FirstName="Worker",
+                LastName="Demo",
+                PhoneNumber="+70000000000", # String format to match admin
+                Admin=False,
+                DateHired="2026-05-11"
+            )
+            db.session.add(user)
+            db.session.commit()
+            print(f"User created: {user_email}")
+        else:
+            # Updates existing user to ensure they aren't an admin
+            user.Admin = False
+            db.session.commit()
+            print(f"User {user_email} verified.")
+
+seed_demo_admin()
+seed_demo_user()
+
+
+
 @app.get("/")
 def health_check():
     return {

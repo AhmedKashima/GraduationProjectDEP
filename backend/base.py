@@ -5,8 +5,7 @@
 from flask import Flask, request, jsonify, json, abort
 from flask_bcrypt import Bcrypt
 from config import ApplicationConfig
-from sqlalchemy import or_, and_, func
-from sqlalchemy.orm import joinedload, subqueryload
+from sqlalchemy import or_, and_
 from flask_cors import CORS, cross_origin
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
@@ -401,16 +400,15 @@ def retrieve_services():
     reqs = request.get_json()
     id1 = reqs.get("CustomerID")
     services = []
-    
-    query = ServiceRecords.query.options(joinedload(ServiceRecords.generator))
 
     if id1 is None:
-        service_records = query.all()
-        for i in service_records:
+        # If no CustomerID provided, return all service records for all customers
+        for i in ServiceRecords.query.all():
+            gName = Generators.query.filter_by(Generatorid = i.Generatorid).first()
             services.append({
                 "ServiceID": i.Serviceid,
                 "CustomerID": i.Customerid,
-                "Generator": i.generator.Name if i.generator else 'N/A',
+                "Generator": gName.Name,
                 "ServiceType": i.ServiceType,
                 "ServicePerformed": i.ServicePerformed,
                 "Date": i.StartDate,
@@ -420,14 +418,17 @@ def retrieve_services():
                 "Notes": i.Notes,
             })
     else:
-        service_records = query.filter_by(Customerid = id1).all()
-        if not service_records:
+        # If a CustomerID is provided, return service records for that customer
+        service_exists = ServiceRecords.query.filter_by(Customerid = id1).first() is not None
+
+        if not service_exists:
             abort(409)
 
-        for i in service_records:
+        for i in ServiceRecords.query.filter_by(Customerid = id1).all():
+            gName = Generators.query.filter_by(Generatorid = i.Generatorid).first()
             services.append({
                 "ServiceID": i.Serviceid,
-                "Generator": i.generator.Name if i.generator else 'N/A',
+                "Generator": gName.Name,
                 "ServiceType": i.ServiceType,
                 "ServicePerformed": i.ServicePerformed,
                 "Date": i.StartDate,
@@ -550,50 +551,71 @@ def complete_job():
 @api.route("/schedule/display", methods = ["POST"])
 @jwt_required()
 def get_all_services():
-    start_date = request.json.get("startDate")
-    end_date = request.json.get("endDate")
-    user = Employees.query.filter_by(Email=get_jwt_identity()).first()
-
-    query = ServiceRecords.query.options(
-        joinedload(ServiceRecords.customer),
-        joinedload(ServiceRecords.generator),
-        subqueryload(ServiceRecords.technicians).joinedload(Service_Employee_Int.employee)
-    )
-
-    if start_date and end_date:
-        query = query.filter(ServiceRecords.StartDate.between(start_date, end_date))
-
-    if not user.Admin:
-        query = query.join(Service_Employee_Int).filter(Service_Employee_Int.Employeeid == user.Employeeid)
-
-    service_records = query.all()
-
+    start_date = request.json.get("startDate", None)
+    end_date = request.json.get("endDate", None)
     services = []
     techs = []
+    user = Employees.query.filter_by(Email=get_jwt_identity()).first()
+    if start_date is None and end_date is None:
+        service_records = ServiceRecords.query.all()
+    else:
+        service_records = ServiceRecords.query.filter(ServiceRecords.StartDate.between(start_date, end_date)).all()
+    
+    #This Code May No Longer Be Necessary
+    #if not service_records:
+       # return jsonify({'message': 'no jobs found'})
 
     for service in service_records:
-        services.append({
-            'service_id': service.Serviceid,
-            'customer_first_name': service.customer.FirstName if service.customer else 'N/A',
-            'customer_last_name': service.customer.LastName if service.customer else 'N/A',
-            'city': service.customer.City if service.customer else 'N/A',
-            'street': service.customer.Street if service.customer else 'N/A',
-            'generator_name': service.generator.Name if service.generator else 'N/A',
-            'service_type': service.ServiceType,
-            'start_date': service.StartDate,
-            'start_time': service.StartTime,
-            'finish_date': service.FinishDate,
-            'finish_time': service.FinishTime,
-            'notes': service.Notes
-        })
+        customer = Customers.query.filter_by(Customerid=service.Customerid).first()
+        generator = Generators.query.filter_by(Generatorid=service.Generatorid).first()
 
-        for tech_assignment in service.technicians:
-            if tech_assignment.employee:
+        if user.Admin == True:
+            for ser_emp_int in Service_Employee_Int.query.filter_by(Serviceid = service.Serviceid).all():
+                emp = Employees.query.filter_by(Employeeid = ser_emp_int.Employeeid).first()
                 techs.append({
                     'service_id': service.Serviceid,
-                    'employee_first_name': tech_assignment.employee.FirstName,
-                    'employee_last_name': tech_assignment.employee.LastName
+                    'employee_first_name': emp.FirstName,
+                    'employee_last_name': emp.LastName
                 })
+
+            services.append({
+                'service_id': service.Serviceid,
+                'customer_first_name': customer.FirstName,
+                'customer_last_name': customer.LastName,
+                'city': customer.City,
+                'street': customer.Street,
+                'generator_name': generator.Name,
+                'service_type': service.ServiceType,
+                'start_date': service.StartDate,
+                'start_time': service.StartTime,
+                'finish_date': service.FinishDate,
+                'finish_time': service.FinishTime,
+                'notes': service.Notes
+            })
+
+        else:
+            for guy in Service_Employee_Int.query.filter_by(Employeeid = user.Employeeid).all():
+                if service.Serviceid == guy.Serviceid:
+                    techs.append({
+                        'service_id': service.Serviceid,
+                        'employee_first_name': user.FirstName,
+                        'employee_last_name': user.LastName
+                    })
+
+                    services.append({
+                        'service_id': service.Serviceid,
+                        'customer_first_name': customer.FirstName,
+                        'customer_last_name': customer.LastName,
+                        'city': customer.City,
+                        'street': customer.Street,
+                        'generator_name': generator.Name,
+                        'service_type': service.ServiceType,
+                        'start_date': service.StartDate,
+                        'start_time': service.StartTime,
+                        'finish_date': service.FinishDate,
+                        'finish_time': service.FinishTime,
+                        'notes': service.Notes
+                    })
 
     return jsonify({'services': services, 'techs': techs, 'team': team(), 'admin': user.Admin, 'generators': retrieve_generators()})
 
@@ -632,47 +654,23 @@ def get_conversations(user_id):
     if not user:
         return jsonify({"msg": "Пользователь не найден"}), 404
 
-    # Subquery for the last message in each conversation
-    last_message_subq = db.session.query(
-        Message.conversation_id,
-        func.max(Message.timestamp).label('last_message_time')
-    ).group_by(Message.conversation_id).subquery()
-
-    # Subquery for unread message counts
-    unread_count_subq = db.session.query(
-        Message.conversation_id,
-        func.count(Message.id).label('unread_count')
-    ).outerjoin(ConversationRead, and_(
-        ConversationRead.conversation_id == Message.conversation_id,
-        ConversationRead.user_id == user_id
-    )).filter(
-        Message.sender_id != user_id,
-        or_(
-            ConversationRead.id == None,
-            Message.timestamp > ConversationRead.last_read_at
-        )
-    ).group_by(Message.conversation_id).subquery()
-
-    conversations = db.session.query(
-        Conversation,
-        Message.content,
-        Message.timestamp,
-        unread_count_subq.c.unread_count
-    ).outerjoin(last_message_subq, last_message_subq.c.conversation_id == Conversation.id
-    ).outerjoin(Message, and_(
-        Message.conversation_id == last_message_subq.c.conversation_id,
-        Message.timestamp == last_message_subq.c.last_message_time
-    )).outerjoin(unread_count_subq, unread_count_subq.c.conversation_id == Conversation.id
-    ).filter(
+    conversations = Conversation.query.filter(
         or_(Conversation.user_one_id == user_id, Conversation.user_two_id == user_id)
-    ).options(
-        joinedload(Conversation.user_one),
-        joinedload(Conversation.user_two)
     ).all()
 
     results = []
-    for conv, last_message_content, last_message_timestamp, unread_count in conversations:
-        other_user = conv.user_two if conv.user_one_id == user_id else conv.user_one
+    for conv in conversations:
+        other_user_id = conv.user_two_id if conv.user_one_id == user_id else conv.user_one_id
+        other_user = Employees.query.get(other_user_id)
+        
+        last_message = Message.query.filter_by(conversation_id=conv.id).order_by(Message.timestamp.desc()).first()
+        read_state = ConversationRead.query.filter_by(conversation_id=conv.id, user_id=user_id).first()
+        last_read_at = read_state.last_read_at if read_state else None
+        unread_query = Message.query.filter_by(conversation_id=conv.id).filter(Message.sender_id != user_id)
+        if last_read_at:
+            unread_query = unread_query.filter(Message.timestamp > last_read_at)
+        unread_count = unread_query.count()
+        
         results.append({
             "conversation_id": conv.id,
             "other_user": {
@@ -681,10 +679,10 @@ def get_conversations(user_id):
                 "email": other_user.Email
             },
             "last_message": {
-                "content": last_message_content,
-                "timestamp": last_message_timestamp.isoformat() if last_message_timestamp else None
+                "content": last_message.content if last_message else None,
+                "timestamp": last_message.timestamp.isoformat() if last_message else None
             },
-            "unread_count": unread_count or 0
+            "unread_count": unread_count
         })
 
     return jsonify(results)
@@ -887,23 +885,17 @@ def get_employee_performance():
     if not user.Admin:
         return jsonify({"msg": "Только для администраторов"}), 403
 
-    performance_data = db.session.query(
-        Employees.FirstName,
-        Employees.LastName,
-        func.count(ServiceRecords.Serviceid).label('completed_tasks')
-    ).outerjoin(Service_Employee_Int, Employees.Employeeid == Service_Employee_Int.Employeeid
-    ).outerjoin(ServiceRecords, and_(
-        Service_Employee_Int.Serviceid == ServiceRecords.Serviceid,
-        ServiceRecords.ServicePerformed == True
-    )).group_by(Employees.Employeeid).all()
-
-    performance = [
-        {
-            "name": f"{first_name} {last_name}",
+    employees = Employees.query.all()
+    performance = []
+    for emp in employees:
+        completed_tasks = ServiceRecords.query.join(Service_Employee_Int).filter(
+            Service_Employee_Int.Employeeid == emp.Employeeid,
+            ServiceRecords.ServicePerformed == True
+        ).count()
+        performance.append({
+            "name": f"{emp.FirstName} {emp.LastName}",
             "tasks": completed_tasks
-        }
-        for first_name, last_name, completed_tasks in performance_data
-    ]
+        })
 
     return jsonify(performance)
 
@@ -916,14 +908,21 @@ def get_revenue_over_time():
         return jsonify({"msg": "Только для администраторов"}), 403
 
     month_labels = {
-        1: "Январь", 2: "Февраль", 3: "Март", 4: "Апрель", 5: "Май", 6: "Июнь",
-        7: "Июль", 8: "Август", 9: "Сентябрь", 10: "Октябрь", 11: "Ноябрь", 12: "Декабрь"
+        1: "Январь",
+        2: "Февраль",
+        3: "Март",
+        4: "Апрель",
+        5: "Май",
+        6: "Июнь",
+        7: "Июль",
+        8: "Август",
+        9: "Сентябрь",
+        10: "Октябрь",
+        11: "Ноябрь",
+        12: "Декабрь"
     }
 
-    services = ServiceRecords.query.filter_by(ServicePerformed=True).options(
-        joinedload(ServiceRecords.generator)
-    ).all()
-    
+    services = ServiceRecords.query.filter_by(ServicePerformed=True).all()
     revenue_by_month = {}
 
     for service in services:
@@ -931,12 +930,13 @@ def get_revenue_over_time():
             date = datetime.strptime(service.StartDate, '%Y-%m-%d')
             month_index = date.month
             
-            if service.generator:
+            generator = Generators.query.get(service.Generatorid)
+            if generator:
                 if month_index not in revenue_by_month:
                     revenue_by_month[month_index] = 0
-                revenue_by_month[month_index] += service.generator.Cost
-        except (ValueError, AttributeError):
-            # Handles cases where the date format is unexpected or generator is missing
+                revenue_by_month[month_index] += generator.Cost
+        except ValueError:
+            # Обработка случаев, когда формат даты не соответствует ожидаемому
             continue
 
     revenue = [
@@ -962,9 +962,11 @@ def get_admin_metrics():
     today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     messages_today = Message.query.filter(Message.timestamp >= today_start).count()
 
-    revenue_total = db.session.query(func.sum(Generators.Cost)).join(
-        ServiceRecords, ServiceRecords.Generatorid == Generators.Generatorid
-    ).filter(ServiceRecords.ServicePerformed == True).scalar() or 0
+    revenue_total = 0
+    for service in ServiceRecords.query.filter_by(ServicePerformed=True).all():
+        generator = Generators.query.get(service.Generatorid)
+        if generator:
+            revenue_total += generator.Cost
 
     completion_rate = round((completed_projects / total_projects) * 100, 2) if total_projects else 0
 
@@ -984,28 +986,25 @@ def get_active_projects():
     if not user.Admin:
         return jsonify({"msg": "Только для администраторов"}), 403
 
-    active_services = ServiceRecords.query.filter_by(ServicePerformed=False).options(
-        joinedload(ServiceRecords.customer),
-        joinedload(ServiceRecords.generator),
-        subqueryload(ServiceRecords.technicians).joinedload(Service_Employee_Int.employee)
-    ).all()
-
+    active = ServiceRecords.query.filter_by(ServicePerformed=False).all()
     results = []
-    for service in active_services:
-        techs = [
-            {
-                "id": tech_assignment.employee.Employeeid,
-                "name": f"{tech_assignment.employee.FirstName} {tech_assignment.employee.LastName}"
-            }
-            for tech_assignment in service.technicians if tech_assignment.employee
-        ]
-
+    for service in active:
+        customer = Customers.query.filter_by(Customerid=service.Customerid).first()
+        generator = Generators.query.filter_by(Generatorid=service.Generatorid).first()
+        techs = []
+        for assignment in Service_Employee_Int.query.filter_by(Serviceid=service.Serviceid).all():
+            tech = Employees.query.filter_by(Employeeid=assignment.Employeeid).first()
+            if tech:
+                techs.append({
+                    "id": tech.Employeeid,
+                    "name": f"{tech.FirstName} {tech.LastName}"
+                })
         results.append({
             "service_id": service.Serviceid,
-            "customer_name": f"{service.customer.FirstName} {service.customer.LastName}" if service.customer else "Неизвестно",
-            "city": service.customer.City if service.customer else "",
-            "street": service.customer.Street if service.customer else "",
-            "generator_name": service.generator.Name if service.generator else "",
+            "customer_name": f"{customer.FirstName} {customer.LastName}" if customer else "Неизвестно",
+            "city": customer.City if customer else "",
+            "street": customer.Street if customer else "",
+            "generator_name": generator.Name if generator else "",
             "service_type": service.ServiceType,
             "start_date": service.StartDate,
             "start_time": service.StartTime,
