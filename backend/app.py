@@ -60,8 +60,36 @@ def seed_demo_admin():
             db.session.commit()
 
 
-seed_demo_admin()
+def seed_demo_user():
+    user_email = "worker@demo.com"
+    user_password = "Worker12345"
 
+    with app.app_context():
+        # db.create_all() is already called in seed_demo_admin, but safe to keep
+        user = Employees.query.filter_by(Email=user_email).first()
+
+        if user is None:
+            user = Employees(
+                Email=user_email,
+                Password=bcrypt.generate_password_hash(user_password).decode("utf-8"),
+                FirstName="Worker",
+                LastName="Demo",
+                PhoneNumber="+70000000000", # String format to match admin
+                Admin=False,
+                DateHired="2026-05-11"
+            )
+            db.session.add(user)
+            db.session.commit()
+            print(f"User created: {user_email}")
+        else:
+            # Updates existing user to ensure they aren't an admin
+            user.Admin = False
+            db.session.commit()
+            print(f"User {user_email} verified.")
+
+
+seed_demo_admin()
+seed_demo_user
 
 @app.get("/")
 def health_check():
